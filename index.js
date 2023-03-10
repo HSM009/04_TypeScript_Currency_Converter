@@ -1,6 +1,7 @@
 #! /usr/bin/env node
 console.clear();
 import chalkAnimation from "chalk-animation";
+import chalk from "chalk";
 //------------------------------------------------------------------------------
 //FUNCTIONS HERE
 //------------------------------------------------------------------------------
@@ -10,7 +11,7 @@ const stopTime = () => {
     });
 };
 async function welcome() {
-    let rainbowTitle = chalkAnimation.neon("Welcome To ATM Banking!\n\nCoded By Hosein Sirat Mohammad\n");
+    let rainbowTitle = chalkAnimation.neon(chalk.yellowBright("Welcome To ATM Banking!\n\nCoded By Hosein Sirat Mohammad\n"));
     await stopTime();
     rainbowTitle.stop();
 }
@@ -18,3 +19,4 @@ async function welcome() {
 //MAIN
 //------------------------------------------------------------------------------
 await welcome();
+console.log('hello');
