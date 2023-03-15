@@ -33,7 +33,7 @@ const stopTime = () => {
     });
 };
 async function welcome() {
-    let rainbowTitle = chalkAnimation.neon(chalk.yellowBright("Welcome To ATM Banking!\n\nCoded By Hosein Sirat Mohammad\n"));
+    let rainbowTitle = chalkAnimation.neon(chalk.redBright("Welcome To ATM Banking!\n\nCoded By Hosein Sirat Mohammad\n"));
     await stopTime();
     rainbowTitle.stop();
 }
@@ -50,7 +50,7 @@ async function localLocation() {
 }
 ;
 async function mainMenu() {
-    console.log('You have selected local Area currency ' + chalk.inverse(localVariable.name) + '.\n');
+    console.log(chalk.blue('Your local Area currency is ' + chalk.inverse(localVariable.name) + '.\n'));
     var seletedOption = await inquirer.prompt([
         {
             type: 'list',
@@ -89,11 +89,10 @@ async function showAll() {
     //Convert to local here//
     //-------------------------------------
     console.log(chalk.bgBlue('\n\t\tSr-No') + ' >>>>>>>>> ' + (chalk.bgBlue('Currency ISO')) + ' = ' + (chalk.bgBlue('Value')));
-    const filerArrCurrency = currecnyValueToPkr.filter((fil) => fil.name != localVariable.name);
     if (filerArrCurrency.length > 0 && localVariable.ISO == 'PKR') {
         let i = 1;
         filerArrCurrency.forEach((val) => {
-            console.log(chalk.blue('\t\t    ' + i) + ' >>>>>>>>> ' + (chalk.blue('1 ' + val.ISO) + '= ' + (chalk.blue(val.value + ' ' + localVariable.ISO))));
+            console.log(chalk.blue('\t\t    ' + i) + ' >>>>>>>>> ' + (chalk.blue('1 ' + val.ISO) + ' = ' + (chalk.blue(val.value + ' ' + localVariable.ISO))));
             i++;
         });
         console.log('\n');
@@ -102,7 +101,7 @@ async function showAll() {
         let i = 1;
         filerArrCurrency.forEach((val) => {
             let fX = fExchangeRate(val.name);
-            console.log(chalk.blue('\t\t    ' + i) + ' >>>>>>>>> ' + (chalk.blue('1 ' + val.ISO) + '= ' + (chalk.blue(fX + ' ' + localVariable.ISO))));
+            console.log(chalk.blue('\t\t    ' + i) + ' >>>>>>>>> ' + (chalk.blue('1 ' + val.ISO) + ' = ' + (chalk.blue(fX + ' ' + localVariable.ISO))));
             i++;
         });
         console.log('\n');
@@ -115,25 +114,29 @@ async function customChoose() {
             type: 'list',
             name: 'select1',
             message: 'Select the currency to enter:',
-            choices: currecnyValueToPkr.filter((filArr) => filArr.name = filArr.name.replace('_', ' ')).map((filArr) => filArr.name)
+            choices: filerArrCurrency.filter((filArr) => filArr.name != localVariable.name).map((filArr) => filArr.name)
         }
     ]);
     var msg = cChoseFunc(cChose.select1);
     var cVal = await inquirer.prompt([
         {
-            type: 'number',
-            name: 'num1',
+            type: "input",
+            name: "num",
             message: msg,
-            validate: function (value) {
-                if (Number.isInteger(value)) {
+            validate(value) {
+                const pass = isNaN(value);
+                if (pass) {
+                    return chalk.bgRed("Please enter a valid number.");
+                }
+                else
                     return true;
-                }
-                else {
-                    return "Incorrect Input. Must type number.";
-                }
             }
         }
     ]);
+    let sISO = filerArrCurrency.filter((gISO) => gISO.name == cChose.select1).map((gISO) => gISO.ISO);
+    let arrChose = fExchangeRate(cChose.select1);
+    let total = (cVal.num * parseFloat(arrChose));
+    console.log(chalk.green('\n\tTotal value after currency conversion from ' + chalk.italic.bold.blue(cVal.num + ' ' + sISO) + ' to ' + chalk.italic.bold.blue(localVariable.ISO) + ' is ' + chalk.italic.bold.yellow(total.toFixed(2)) + '.\n'));
 }
 ;
 function cChoseFunc(getCurrency) {
@@ -149,6 +152,7 @@ function fExchangeRate(cName) {
 //------------------------------------------------------------------------------
 //MAIN HERE
 //------------------------------------------------------------------------------
-// await welcome();
+await welcome();
 await localLocation();
+const filerArrCurrency = currecnyValueToPkr.filter((fil) => fil.name != localVariable.name);
 await mainMenu();
