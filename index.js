@@ -58,11 +58,15 @@ async function mainMenu() {
             message: 'What would you like to do?',
             choices: [
                 {
-                    name: 'Show all currencies and their currency conversion to ' + localVariable.name + ':',
+                    name: 'Show all currencies and their currency conversion to ' + localVariable.name + '.',
                     value: 'showAllChoice'
                 },
                 {
-                    name: 'Choose custom currency converter:',
+                    name: 'Choose currency conversion with local area currency ' + localVariable.name + '.',
+                    value: 'localConverterChoice'
+                },
+                {
+                    name: 'Choose custom currency conversion.',
                     value: 'customConverterChoice'
                 },
                 {
@@ -73,11 +77,15 @@ async function mainMenu() {
         }
     ]);
     if (seletedOption.menuOption == 'showAllChoice') {
-        await showAll();
+        await showAllFunc();
+        mainMenu();
+    }
+    else if (seletedOption.menuOption == 'localConverterChoice') {
+        await localChooseFunc();
         mainMenu();
     }
     else if (seletedOption.menuOption == 'customConverterChoice') {
-        await customChoose();
+        await customChooseFunc();
         mainMenu();
     }
     else {
@@ -85,7 +93,7 @@ async function mainMenu() {
     }
 }
 ;
-async function showAll() {
+async function showAllFunc() {
     //Convert to local here//
     //-------------------------------------
     console.log(chalk.bgBlue('\n\t\tSr-No') + ' >>>>>>>>> ' + (chalk.bgBlue('Currency ISO')) + ' = ' + (chalk.bgBlue('Value')));
@@ -108,12 +116,12 @@ async function showAll() {
     }
 }
 ;
-async function customChoose() {
+async function localChooseFunc() {
     var cChose = await inquirer.prompt([
         {
             type: 'list',
             name: 'select1',
-            message: 'Select the currency to enter:',
+            message: 'Select the other currency.',
             choices: filerArrCurrency.filter((filArr) => filArr.name != localVariable.name).map((filArr) => filArr.name)
         }
     ]);
@@ -136,7 +144,7 @@ async function customChoose() {
     let sISO = filerArrCurrency.filter((gISO) => gISO.name == cChose.select1).map((gISO) => gISO.ISO);
     let arrChose = fExchangeRate(cChose.select1);
     let total = (cVal.num * parseFloat(arrChose));
-    console.log(chalk.green('\n\tTotal value after currency conversion from ' + chalk.italic.bold.blue(cVal.num + ' ' + sISO) + ' to ' + chalk.italic.bold.blue(localVariable.ISO) + ' is ' + chalk.italic.bold.yellow(total.toFixed(2)) + '.\n'));
+    console.log(chalk.green('\n\tTotal value after currency conversion from ' + chalk.italic.bold.blue(cVal.num + ' ' + sISO) + ' is ' + chalk.italic.bold.yellow(total.toFixed(2) + ' ' + localVariable.ISO) + '.\n'));
 }
 ;
 function cChoseFunc(getCurrency) {
@@ -147,6 +155,44 @@ function fExchangeRate(cName) {
     let num1 = currecnyValueToPkr.find((val) => val.name == localVariable.name);
     let num2 = currecnyValueToPkr.find((val) => val.name == cName);
     return (num2.value / num1.value).toFixed(4).toString();
+}
+;
+async function customChooseFunc() {
+    var duoChose = await inquirer.prompt([
+        {
+            type: 'list',
+            name: 'chose1',
+            message: 'Select the first currency with amount',
+            choices: filerArrCurrency.map((filArr) => filArr.name)
+        },
+        {
+            type: "input",
+            name: "num",
+            message: 'Input amount.',
+            validate(value) {
+                const pass = isNaN(value);
+                if (pass) {
+                    return chalk.bgRed("Please enter a valid number.");
+                }
+                else
+                    return true;
+            }
+        }
+    ]);
+    var duoChose2 = await inquirer.prompt([
+        {
+            type: 'list',
+            name: 'chose2',
+            message: 'Select the second currency to equal with',
+            choices: filerArrCurrency.filter((filArr) => filArr.name != duoChose.chose1).map((filArr) => filArr.name)
+        }
+    ]);
+    let sChose1ISO = filerArrCurrency.filter((gISO) => gISO.name == duoChose.chose1).map((gISO) => gISO.ISO);
+    let sChose2ISO = filerArrCurrency.filter((gISO) => gISO.name == duoChose2.chose2).map((gISO) => gISO.ISO);
+    let valChose1 = fExchangeRate(duoChose.chose1);
+    let valChose2 = fExchangeRate(duoChose2.chose2);
+    let total = ((parseFloat(valChose1) * duoChose.num) * parseFloat(valChose2));
+    console.log(chalk.green('\n\tTotal value after currency conversion from ' + chalk.italic.bold.blue(duoChose.num + ' ' + sChose1ISO) + ' is ' + chalk.italic.bold.yellow(total.toFixed(2) + ' ' + sChose2ISO) + '.\n'));
 }
 ;
 //------------------------------------------------------------------------------

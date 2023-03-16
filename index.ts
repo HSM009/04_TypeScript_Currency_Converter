@@ -75,11 +75,15 @@ async function mainMenu() {
             message:'What would you like to do?',
             choices: [
                 {
-                    name:   'Show all currencies and their currency conversion to ' + localVariable.name + ':',
+                    name:   'Show all currencies and their currency conversion to ' + localVariable.name + '.',
                     value:  'showAllChoice'
                 },
                 {
-                    name:   'Choose currency conversion with local area currency.',
+                    name:   'Choose currency conversion with local area currency ' + localVariable.name +'.',
+                    value:  'localConverterChoice'
+                },
+                {
+                    name:   'Choose custom currency conversion.',
                     value:  'customConverterChoice'
                 },
                 {
@@ -92,12 +96,17 @@ async function mainMenu() {
     
     if (seletedOption.menuOption == 'showAllChoice')
     {
-        await showAll();
+        await showAllFunc();
+        mainMenu();
+    }
+    else if (seletedOption.menuOption == 'localConverterChoice')
+    {
+        await localChooseFunc();
         mainMenu();
     }
     else if (seletedOption.menuOption == 'customConverterChoice')
     {
-        await customChoose();
+        await customChooseFunc();
         mainMenu();
     }
     else
@@ -107,7 +116,7 @@ async function mainMenu() {
 
 };
 
-async function showAll() {
+async function showAllFunc() {
     
     //Convert to local here//
 
@@ -137,7 +146,7 @@ async function showAll() {
     }
 };
 
-async function customChoose() {
+async function localChooseFunc() {
     var cChose = await inquirer.prompt([
         {
             type:       'list',
@@ -169,7 +178,7 @@ async function customChoose() {
 
     let arrChose = fExchangeRate(cChose.select1);
     let total:number = (cVal.num * parseFloat(arrChose));
-    console.log( chalk.green('\n\tTotal value after currency conversion from '+ chalk.italic.bold.blue(cVal.num + ' ' + sISO) + ' to ' + chalk.italic.bold.blue(localVariable.ISO) + ' is ' + chalk.italic.bold.yellow(total.toFixed(2)) + '.\n'));
+    console.log( chalk.green('\n\tTotal value after currency conversion from '+ chalk.italic.bold.blue(cVal.num + ' ' + sISO) + ' is ' + chalk.italic.bold.yellow(total.toFixed(2)+ ' ' +localVariable.ISO) + '.\n'));
 
 };
 
@@ -183,6 +192,49 @@ function fExchangeRate(cName:string)
     let num2:any = currecnyValueToPkr.find((val) => val.name == cName );
     
     return  (num2.value/num1.value).toFixed(4).toString()
+};
+
+
+async function customChooseFunc(){
+    var duoChose:any = await inquirer.prompt([
+        {
+            type:       'list',
+            name:       'chose1',
+            message:    'Select the first currency with amount',
+            choices:    filerArrCurrency.map((filArr:any) => filArr.name)
+        },
+        {
+            type : "input",
+            name : "num",
+            message : 'Input amount.',
+            validate(value) {
+                const pass = isNaN(value);
+                if (pass ) 
+                {                    
+                    return chalk.bgRed("Please enter a valid number.");
+                }
+                else
+                return true;
+            }       
+        }
+    ]);
+    var duoChose2:any = await inquirer.prompt ([
+        {
+            type:       'list',
+            name:       'chose2',
+            message:    'Select the second currency to equal with',
+            choices:    filerArrCurrency.filter((filArr)=> filArr.name != duoChose.chose1).map((filArr) => filArr.name)
+        }
+    ]);
+
+    let sChose1ISO = filerArrCurrency.filter((gISO:any) => gISO.name == duoChose.chose1).map((gISO) => gISO.ISO);
+    let sChose2ISO = filerArrCurrency.filter((gISO:any) => gISO.name == duoChose2.chose2).map((gISO) => gISO.ISO);
+
+    let valChose1 = fExchangeRate(duoChose.chose1);
+    let valChose2 = fExchangeRate(duoChose2.chose2);
+    let total:number = ((parseFloat(valChose1) * duoChose.num ) * parseFloat(valChose2));
+    console.log( chalk.green('\n\tTotal value after currency conversion from '+ chalk.italic.bold.blue(duoChose.num + ' ' + sChose1ISO) + ' is ' + chalk.italic.bold.yellow(total.toFixed(2)+ ' ' +sChose2ISO) + '.\n'));
+
 };
 
 //------------------------------------------------------------------------------
