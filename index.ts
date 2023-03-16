@@ -79,7 +79,7 @@ async function mainMenu() {
                     value:  'showAllChoice'
                 },
                 {
-                    name:   'Choose custom currency converter:',
+                    name:   'Choose currency conversion with local area currency.',
                     value:  'customConverterChoice'
                 },
                 {
@@ -142,7 +142,7 @@ async function customChoose() {
         {
             type:       'list',
             name:       'select1',
-            message:    'Select the currency to enter:',
+            message:    'Select the other currency.',
             choices:    filerArrCurrency.filter((filArr)=> filArr.name != localVariable.name).map((filArr) => filArr.name)
             
         }
